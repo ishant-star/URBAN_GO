@@ -8,12 +8,14 @@ import orderRoutes from "./Routes/order.js"
 import paymentRoutes from "./Routes/payment.js"
 
 dotenv.config();
-console.log("Loaded DB URI:",process.env.MONGO_URI);
-const app = express();
-const port = process.env.PORT || 5000; // Use PORT from .env or default 5000
-const db = process.env.MONGO_URI; // Use your MongoDB URI from .env
 
-app.use(cors());
+const app = express();
+const port = process.env.PORT || 5000;
+const db = process.env.MONGO_URI;
+
+app.use(cors({
+  origin: "https://urban-go-pi.vercel.app/"
+}));
 app.use(express.json()); // Important to parse JSON body
 
 // Connect to MongoDB
