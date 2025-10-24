@@ -21,7 +21,7 @@ function Summary() {
 
         console.log("🔍 Fetching orders from payment API...");
         
-        const response = await fetch("http://localhost:5000/api/payment/orders", {
+        const response = await fetch(`${import.meta.env.REACT_APP_API_URL}api/payment/orders`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -43,7 +43,7 @@ function Summary() {
           // If payment API fails, try fallback to orders API
           console.log("⚠️ Payment API failed, trying orders API fallback...");
           
-          const fallbackResponse = await fetch("http://localhost:5000/orders", {
+          const fallbackResponse = await fetch(`${import.meta.env.REACT_APP_API_URL}orders`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",

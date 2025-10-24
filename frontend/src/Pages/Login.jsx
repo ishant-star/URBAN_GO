@@ -32,7 +32,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const endpoint = register ? "http://localhost:5000/login" : "http://localhost:5000/login/login";
+      const endpoint = register ? `${import.meta.env.REACT_APP_API_URL}login` : `${import.meta.env.REACT_APP_API_URL}login/login`;
       const payload = register
         ? formData
         : { email: formData.email, password: formData.password };
