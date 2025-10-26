@@ -68,14 +68,7 @@ app.use("/contact", contactRoutes);
 app.use("/login",  loginRoutes);
 app.use("/orders", orderRoutes);
 app.use("/api/payment", paymentRoutes);
-
-
-
-
-
-
 // Start server
 app.listen(port, () => {
     console.log(`Backend is running on port number ${port}`);
 });
-""  
