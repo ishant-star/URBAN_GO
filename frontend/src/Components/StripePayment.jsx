@@ -10,11 +10,16 @@ import { toast } from 'react-toastify';
 
 // Initialize Stripe with your publishable key
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+console.log('Stripe key loaded:', import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ? 'Yes' : 'No');
 
 const CheckoutForm = ({ orderData, onPaymentSuccess, onPaymentError }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
+
+  console.log('Stripe loaded:', stripe ? 'Yes' : 'No');
+  console.log('Elements loaded:', elements ? 'Yes' : 'No');
+  console.log('CardElement:', elements ? elements.getElement(CardElement) : 'Not available');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -89,7 +94,10 @@ const CheckoutForm = ({ orderData, onPaymentSuccess, onPaymentError }) => {
         '::placeholder': {
           color: '#94a3b8',
         },
-        backgroundColor: 'transparent',
+        backgroundColor: '#1e293b', // slate-800 to match parent
+        border: '1px solid #10b981', // emerald-500
+        borderRadius: '0.5rem',
+        padding: '0.5rem',
       },
       invalid: {
         color: '#ef4444',
