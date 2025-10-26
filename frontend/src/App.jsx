@@ -13,24 +13,18 @@ import Summary from './Pages/Summary.jsx'
 
 function App() {
   return (
-    // <BrowserRouter>
-<>
-
-   <Routes>
-
-    <Route path='/'        element={<Home/>} />
-    <Route path='/Contact' element={<Contact/>} />
-    <Route path='/login'   element={<Login/>} />
-    <Route path='/product' element={<Product/>} />
-    <Route path='/ToCart'  element={<Cart/>} />
-    <Route path='/order'   element={<Order/>}/>
-    <Route path='/summary' element={<Summary/>} />
-   </Routes>
-
- 
-</>
-  //  {/* </BrowserRouter> */}
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path='/'        element={<Home/>} />
+        <Route path='/Contact' element={<Contact/>} />
+        <Route path='/login'   element={<Login/>} />
+        <Route path='/product' element={<Product/>} />
+        <Route path='/ToCart'  element={<Cart/>} />
+        <Route path='/order'   element={<Order/>}/>
+        <Route path='/summary' element={<Summary/>} />
+      </Routes>
+    </BrowserRouter>
+   )
 }
 
 export default App
