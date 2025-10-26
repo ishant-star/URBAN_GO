@@ -5,7 +5,6 @@ import {
   useStripe
 } from '@stripe/react-stripe-js';
 import { toast } from 'react-toastify';
-import Input from '../design-system/components/Input';
 
 // Initialize Stripe with your publishable key
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_...');
@@ -100,25 +99,28 @@ const CheckoutForm = ({ orderData, onPaymentSuccess, onPaymentError }) => {
           Card Details
         </label>
         <div className="space-y-4">
-          <Input
+          <input
             type="text"
             placeholder="Card Number"
             value={cardNumber}
             onChange={(e) => setCardNumber(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
-          <Input
+          <input
             type="text"
             placeholder="MM/YY"
             value={expiry}
             onChange={(e) => setExpiry(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
-          <Input
+          <input
             type="text"
             placeholder="CVC"
             value={cvc}
             onChange={(e) => setCvc(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
@@ -127,10 +129,10 @@ const CheckoutForm = ({ orderData, onPaymentSuccess, onPaymentError }) => {
       <button
         type="submit"
         disabled={!stripe || processing || !cardNumber || !expiry || !cvc}
-        className={`w-full py-3 rounded-xl font-semibold transition ${
+        className={`w-full py-3 rounded-xl font-semibold transition-colors ${
           processing || !stripe || !cardNumber || !expiry || !cvc
             ? 'bg-gray-500 cursor-not-allowed text-gray-300'
-            : 'bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white'
+            : 'bg-blue-600 hover:bg-blue-700 text-white'
         }`}
       >
         {processing ? 'Processing Payment...' : `Pay ₹${orderData.pricing.total.toFixed(2)}`}
