@@ -28,7 +28,7 @@ const CheckoutForm = ({ orderData, onPaymentSuccess, onPaymentError }) => {
     try {
       // Create payment intent
       const token = localStorage.getItem("authToken");
-      const response = await fetch(`${import.meta.env.REACT_APP_API_URL}payment/create-payment-intent`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/payment/create-payment-intent`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
