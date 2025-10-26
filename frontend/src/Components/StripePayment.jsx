@@ -2,32 +2,28 @@ import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
-  useStripe
+  CardElement,
+  useStripe,
+  useElements
 } from '@stripe/react-stripe-js';
 import { toast } from 'react-toastify';
-import Input from '../design-system/components/Input';
 
 // Initialize Stripe with your publishable key
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const CheckoutForm = ({ orderData, onPaymentSuccess, onPaymentError }) => {
   const stripe = useStripe();
+  const elements = useElements();
   const [processing, setProcessing] = useState(false);
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvc, setCvc] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!stripe) {
-      console.log('Stripe not loaded');
+    if (!stripe || !elements) {
       return;
     }
 
     setProcessing(true);
-
-    console.log('Starting payment process for amount:', orderData.pricing.total);
 
     try {
       // Create payment intent
@@ -51,17 +47,10 @@ const CheckoutForm = ({ orderData, onPaymentSuccess, onPaymentError }) => {
         throw new Error('Failed to create payment intent');
       }
 
-      // Confirm payment with manual card details
-      const [expMonth, expYear] = expiry.split('/').map(Number);
-      console.log('Confirming payment with card details:', { cardNumber, expMonth, expYear, cvc });
+      // Confirm payment
       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
-          card: {
-            number: cardNumber,
-            exp_month: expMonth,
-            exp_year: expYear,
-            cvc: cvc,
-          },
+          card: elements.getElement(CardElement),
           billing_details: {
             name: orderData.customerInfo.name,
             email: orderData.customerInfo.email,
@@ -85,12 +74,27 @@ const CheckoutForm = ({ orderData, onPaymentSuccess, onPaymentError }) => {
 
     } catch (error) {
       console.error('Payment error:', error);
-      console.log('Error details:', error.message);
       onPaymentError(error.message);
       toast.error(`Payment error: ${error.message}`);
     } finally {
       setProcessing(false);
     }
+  };
+
+  const cardElementOptions = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#ffffff',
+        '::placeholder': {
+          color: '#94a3b8',
+        },
+        backgroundColor: 'transparent',
+      },
+      invalid: {
+        color: '#ef4444',
+      },
+    },
   };
 
   return (
@@ -99,36 +103,14 @@ const CheckoutForm = ({ orderData, onPaymentSuccess, onPaymentError }) => {
         <label className="block text-emerald-400 text-lg font-semibold mb-3">
           Card Details
         </label>
-        <div className="space-y-4">
-          <Input
-            type="text"
-            placeholder="Card Number"
-            value={cardNumber}
-            onChange={(e) => setCardNumber(e.target.value)}
-            required
-          />
-          <Input
-            type="text"
-            placeholder="MM/YY"
-            value={expiry}
-            onChange={(e) => setExpiry(e.target.value)}
-            required
-          />
-          <Input
-            type="text"
-            placeholder="CVC"
-            value={cvc}
-            onChange={(e) => setCvc(e.target.value)}
-            required
-          />
-        </div>
+        <CardElement options={cardElementOptions} />
       </div>
-      
+
       <button
         type="submit"
-        disabled={!stripe || processing || !cardNumber || !expiry || !cvc}
+        disabled={!stripe || processing}
         className={`w-full py-3 rounded-xl font-semibold transition ${
-          processing || !stripe || !cardNumber || !expiry || !cvc
+          processing || !stripe
             ? 'bg-gray-500 cursor-not-allowed text-gray-300'
             : 'bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white'
         }`}
@@ -150,5 +132,3 @@ const StripePayment = ({ orderData, onPaymentSuccess, onPaymentError }) => {
     </Elements>
   );
 };
-
-export default StripePayment;
