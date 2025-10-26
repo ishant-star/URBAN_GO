@@ -9,7 +9,7 @@ import {
 import { toast } from 'react-toastify';
 
 // Initialize Stripe with your publishable key
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_...');
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const CheckoutForm = ({ orderData, onPaymentSuccess, onPaymentError }) => {
   const stripe = useStripe();
