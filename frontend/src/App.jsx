@@ -13,7 +13,7 @@ import Summary from './Pages/Summary.jsx'
 
 function App() {
   return (
-    <BrowserRouter>
+    
       <Routes>
         <Route path='/'        element={<Home/>} />
         <Route path='/Contact' element={<Contact/>} />
@@ -23,7 +23,7 @@ function App() {
         <Route path='/order'   element={<Order/>}/>
         <Route path='/summary' element={<Summary/>} />
       </Routes>
-    </BrowserRouter>
+
    )
 }
 
