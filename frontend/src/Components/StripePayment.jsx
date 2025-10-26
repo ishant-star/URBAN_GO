@@ -1,92 +1,88 @@
-import React, { useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
+import React, { useState } from "react";
+import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
-  useStripe
-} from '@stripe/react-stripe-js';
-import { toast } from 'react-toastify';
+  CardElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
+import { toast } from "react-toastify";
 
 // Initialize Stripe with your publishable key
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_...');
+const stripePromise = loadStripe(
+  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "pk_test_YOUR_KEY_HERE"
+);
 
 const CheckoutForm = ({ orderData, onPaymentSuccess, onPaymentError }) => {
   const stripe = useStripe();
+  const elements = useElements();
   const [processing, setProcessing] = useState(false);
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvc, setCvc] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!stripe) {
-      console.log('Stripe not loaded');
+    if (!stripe || !elements) {
+      toast.error("Stripe not initialized properly.");
       return;
     }
 
     setProcessing(true);
 
-    console.log('Starting payment process for amount:', orderData.pricing.total);
-
     try {
-      // Create payment intent
+      // Create payment intent on backend
       const token = localStorage.getItem("authToken");
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/payment/create-payment-intent`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          amount: orderData.pricing.total,
-          items: orderData.items,
-          customerInfo: orderData.customerInfo
-        })
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/payment/create-payment-intent`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            amount: orderData.pricing.total,
+            items: orderData.items,
+            customerInfo: orderData.customerInfo,
+          }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to create payment intent");
 
       const { clientSecret } = await response.json();
 
-      if (!response.ok) {
-        throw new Error('Failed to create payment intent');
-      }
-
-      // Confirm payment with manual card details
-      const [expMonth, expYear] = expiry.split('/').map(Number);
-      console.log('Confirming payment with card details:', { cardNumber, expMonth, expYear, cvc });
-      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: {
-            number: cardNumber,
-            exp_month: expMonth,
-            exp_year: expYear,
-            cvc: cvc,
-          },
-          billing_details: {
-            name: orderData.customerInfo.name,
-            email: orderData.customerInfo.email,
-            phone: orderData.customerInfo.phone,
-            address: {
-              line1: orderData.customerInfo.address,
+      // Confirm payment using Stripe Elements (CardElement)
+      const cardElement = elements.getElement(CardElement);
+      const { error, paymentIntent } = await stripe.confirmCardPayment(
+        clientSecret,
+        {
+          payment_method: {
+            card: cardElement,
+            billing_details: {
+              name: orderData.customerInfo.name,
+              email: orderData.customerInfo.email,
+              phone: orderData.customerInfo.phone,
+              address: {
+                line1: orderData.customerInfo.address,
+              },
             },
           },
-        },
-      });
+        }
+      );
 
       if (error) {
-        console.error('Payment failed:', error);
-        onPaymentError(error.message);
+        console.error("Payment failed:", error);
         toast.error(`Payment failed: ${error.message}`);
-      } else if (paymentIntent.status === 'succeeded') {
-        console.log('Payment succeeded:', paymentIntent);
+        onPaymentError(error.message);
+      } else if (paymentIntent.status === "succeeded") {
+        console.log("Payment succeeded:", paymentIntent);
+        toast.success("Payment successful!");
         onPaymentSuccess(paymentIntent);
-        toast.success('Payment successful!');
       }
-
     } catch (error) {
-      console.error('Payment error:', error);
-      console.log('Error details:', error.message);
-      onPaymentError(error.message);
+      console.error("Payment error:", error);
       toast.error(`Payment error: ${error.message}`);
+      onPaymentError(error.message);
     } finally {
       setProcessing(false);
     }
@@ -98,44 +94,34 @@ const CheckoutForm = ({ orderData, onPaymentSuccess, onPaymentError }) => {
         <label className="block text-emerald-400 text-lg font-semibold mb-3">
           Card Details
         </label>
-        <div className="space-y-4">
-          <input
-            type="text"
-            placeholder="Card Number"
-            value={cardNumber}
-            onChange={(e) => setCardNumber(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <input
-            type="text"
-            placeholder="MM/YY"
-            value={expiry}
-            onChange={(e) => setExpiry(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <input
-            type="text"
-            placeholder="CVC"
-            value={cvc}
-            onChange={(e) => setCvc(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
+        <div className="p-3 bg-white rounded-md">
+          <CardElement
+            options={{
+              style: {
+                base: {
+                  fontSize: "16px",
+                  color: "#32325d",
+                  "::placeholder": { color: "#a0aec0" },
+                },
+                invalid: { color: "#fa755a" },
+              },
+            }}
           />
         </div>
       </div>
 
       <button
         type="submit"
-        disabled={!stripe || processing || !cardNumber || !expiry || !cvc}
+        disabled={!stripe || processing}
         className={`w-full py-3 rounded-xl font-semibold transition-colors ${
-          processing || !stripe || !cardNumber || !expiry || !cvc
-            ? 'bg-gray-500 cursor-not-allowed text-gray-300'
-            : 'bg-blue-600 hover:bg-blue-700 text-white'
+          processing
+            ? "bg-gray-500 cursor-not-allowed text-gray-300"
+            : "bg-blue-600 hover:bg-blue-700 text-white"
         }`}
       >
-        {processing ? 'Processing Payment...' : `Pay ₹${orderData.pricing.total.toFixed(2)}`}
+        {processing
+          ? "Processing Payment..."
+          : `Pay ₹${orderData.pricing.total.toFixed(2)}`}
       </button>
     </form>
   );
@@ -144,11 +130,13 @@ const CheckoutForm = ({ orderData, onPaymentSuccess, onPaymentError }) => {
 const StripePayment = ({ orderData, onPaymentSuccess, onPaymentError }) => {
   return (
     <Elements stripe={stripePromise}>
-      <CheckoutForm 
-        orderData={orderData} 
+      <CheckoutForm
+        orderData={orderData}
         onPaymentSuccess={onPaymentSuccess}
         onPaymentError={onPaymentError}
       />
     </Elements>
   );
 };
+
+export default StripePayment;
