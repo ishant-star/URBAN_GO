@@ -6,7 +6,7 @@ import Order from "../Models/Order.js";
 const router = express.Router();
 
 // Initialize Stripe with your secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_...", {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2023-10-16",
 });
 
