@@ -10,9 +10,14 @@ router.post("/",async(req,res)=>{
     try{
         const {Name , email , password  , need}=req.body;
 
+        // Validate required fields
+        if (!Name || !email || !password) {
+            return res.status(400).json({message:"Name, email, and password are required"});
+        }
+
         // Check if user already exists
         const oldUser = await Login.findOne({email})
-         
+
         if(oldUser){
             return res.status(400).json({message:"User Already Exists"});
         }
@@ -57,6 +62,11 @@ router.post("/",async(req,res)=>{
 router.post("/login",async(req,res)=>{
     try{
         const{email,password}=req.body;
+
+        // Validate required fields
+        if (!email || !password) {
+            return res.status(400).json({message:"Email and password are required"});
+        }
 
         //Find User By Email
         const user = await Login.findOne({email});
