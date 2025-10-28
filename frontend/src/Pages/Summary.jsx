@@ -21,7 +21,7 @@ function Summary() {
 
         console.log("🔍 Fetching orders from payment API...");
         
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/payment/orders`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
