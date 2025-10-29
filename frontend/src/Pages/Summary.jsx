@@ -6,102 +6,135 @@ function Summary() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const token = localStorage.getItem("authToken");
+  // useEffect(() => {
+  //   const fetchOrders = async () => {
+  //     try {
+  //       const token = localStorage.getItem("authToken");
         
-        console.log("🔐 Summary - Checking authentication token...");
-        console.log("🔐 Token exists:", !!token);
-        console.log("🔐 Token preview:", token ? `${token.substring(0, 20)}...` : 'None');
+  //       console.log("🔐 Summary - Checking authentication token...");
+  //       console.log("🔐 Token exists:", !!token);
+  //       console.log("🔐 Token preview:", token ? `${token.substring(0, 20)}...` : 'None');
         
-        if (!token) {
-          throw new Error("No authentication token found. Please login again.");
-        }
+  //       if (!token) {
+  //         throw new Error("No authentication token found. Please login again.");
+  //       }
 
-        console.log("🔍 Fetching orders from payment API...");
+  //       console.log("🔍 Fetching orders from payment API...");
         
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  //       const response = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
+  //         method: "GET",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
 
-        const data = await response.json();
-        console.log("📊 Payment API Response:", data);
+  //       const data = await response.json();
+  //       console.log("📊 Payment API Response:", data);
 
-        if (!response.ok) {
-          // Check if it's a token signature error
-          if (response.status === 403 && (data.message?.includes('Invalid') || data.message?.includes('expired'))) {
-            console.log("🔄 Token signature invalid - clearing localStorage and redirecting to login");
-            localStorage.removeItem("authToken");
-            window.location.href = "/login";
-            return;
-          }
-          // If payment API fails, try fallback to orders API
-          console.log("⚠️ Payment API failed, trying orders API fallback...");
+  //       if (!response.ok) {
+  //         // Check if it's a token signature error
+  //         if (response.status === 403 && (data.message?.includes('Invalid') || data.message?.includes('expired'))) {
+  //           console.log("🔄 Token signature invalid - clearing localStorage and redirecting to login");
+  //           localStorage.removeItem("authToken");
+  //           window.location.href = "/login";
+  //           return;
+  //         }
+  //         // If payment API fails, try fallback to orders API
+  //         console.log("⚠️ Payment API failed, trying orders API fallback...");
           
-          const fallbackResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          });
+  //         const fallbackResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
+  //           method: "GET",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         });
 
-          const fallbackData = await fallbackResponse.json();
-          console.log("📊 Orders API Response:", fallbackData);
+  //         const fallbackData = await fallbackResponse.json();
+  //         console.log("📊 Orders API Response:", fallbackData);
 
-          if (!fallbackResponse.ok) {
-            if (fallbackResponse.status === 401) {
-              localStorage.removeItem("authToken");
-              throw new Error("Session expired. Please login again.");
-            } else if (fallbackResponse.status === 403) {
-              throw new Error("Access denied. Please check your permissions.");
-            } else {
-              throw new Error(fallbackData.error || fallbackData.message || "Failed to fetch orders");
-            }
-          }
+  //         if (!fallbackResponse.ok) {
+  //           if (fallbackResponse.status === 401) {
+  //             localStorage.removeItem("authToken");
+  //             throw new Error("Session expired. Please login again.");
+  //           } else if (fallbackResponse.status === 403) {
+  //             throw new Error("Access denied. Please check your permissions.");
+  //           } else {
+  //             throw new Error(fallbackData.error || fallbackData.message || "Failed to fetch orders");
+  //           }
+  //         }
 
-          // Handle fallback response (orders API format)
-          if (fallbackData.orders && Array.isArray(fallbackData.orders)) {
-            console.log("✅ Orders loaded from fallback API:", fallbackData.orders.length);
-            setOrders(fallbackData.orders);
-          } else {
-            console.warn("⚠️ Unexpected fallback response structure:", fallbackData);
-            setOrders([]);
-          }
-        } else {
-          // Handle successful payment API response
-          if (data.success && data.data && data.data.orders) {
-            console.log("✅ Orders loaded from payment API:", data.data.orders.length);
-            setOrders(data.data.orders);
-          } else if (data.data && Array.isArray(data.data.orders)) {
-            // Handle case where orders array exists but success flag might be missing
-            console.log("✅ Orders loaded (alternative format):", data.data.orders.length);
-            setOrders(data.data.orders);
-          } else if (Array.isArray(data)) {
-            // Handle case where response is directly an array
-            console.log("✅ Orders loaded (direct array):", data.length);
-            setOrders(data);
-          } else {
-            console.warn("⚠️ Unexpected payment API response structure:", data);
-            setOrders([]);
-          }
-        }
+  //         // Handle fallback response (orders API format)
+  //         if (fallbackData.orders && Array.isArray(fallbackData.orders)) {
+  //           console.log("✅ Orders loaded from fallback API:", fallbackData.orders.length);
+  //           setOrders(fallbackData.orders);
+  //         } else {
+  //           console.warn("⚠️ Unexpected fallback response structure:", fallbackData);
+  //           setOrders([]);
+  //         }
+  //       } else {
+  //         // Handle successful payment API response
+  //         if (data.success && data.data && data.data.orders) {
+  //           console.log("✅ Orders loaded from payment API:", data.data.orders.length);
+  //           setOrders(data.data.orders);
+  //         } else if (data.data && Array.isArray(data.data.orders)) {
+  //           // Handle case where orders array exists but success flag might be missing
+  //           console.log("✅ Orders loaded (alternative format):", data.data.orders.length);
+  //           setOrders(data.data.orders);
+  //         } else if (Array.isArray(data)) {
+  //           // Handle case where response is directly an array
+  //           console.log("✅ Orders loaded (direct array):", data.length);
+  //           setOrders(data);
+  //         } else {
+  //           console.warn("⚠️ Unexpected payment API response structure:", data);
+  //           setOrders([]);
+  //         }
+  //       }
         
-      } catch (err) {
-        console.error("❌ Error fetching orders:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //     } catch (err) {
+  //       console.error("❌ Error fetching orders:", err);
+  //       setError(err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchOrders();
-  }, []);
+  //   fetchOrders();
+  // }, []);
+  useEffect(() => {
+  const fetchOrders = async () => {
+    try {
+      console.log("🔐 Summary - Checking authentication token...");
+      const token = localStorage.getItem("token");
+      console.log("🔐 Token exists:", !!token);
+      if (!token) return;
+
+      console.log("🔍 Fetching orders from payment API...");
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      console.log("📊 Payment API Response:", data);
+
+      if (data.orders && Array.isArray(data.orders)) {
+        setOrders(data.orders);
+      } else {
+        console.warn("⚠️ Unexpected payment API response structure:", data);
+        setOrders([]);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching orders:", error);
+      setOrders([]);
+    }
+  };
+
+  fetchOrders();
+}, []);
+
 
   if (loading) {
     return (
